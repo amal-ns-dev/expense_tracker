@@ -1,0 +1,472 @@
+{% extends 'my_app/base.html' %} {% load humanize %} {% block body %}
+
+<!-- Dark Shell -->
+<div
+  class="min-h-screen w-full bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-slate-100"
+>
+  <!-- Header -->
+  <header
+    class="sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-slate-900/60 bg-slate-900/80 border-b border-slate-800"
+  >
+    <div
+      class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="h-9 w-9 rounded-2xl bg-indigo-500 shadow-lg shadow-indigo-900/40 flex items-center justify-center text-white font-bold"
+        >
+          $
+        </div>
+        <div>
+          <h1
+            class="text-xl sm:text-2xl font-bold tracking-tight text-slate-100"
+          >
+            Expense Dashboard
+          </h1>
+          <p class="text-xs text-slate-400 hidden sm:block">
+            Track expenses, visualize trends, and keep totals in check.
+          </p>
+        </div>
+      </div>
+      <div class="hidden sm:flex items-center gap-2">
+        <a
+          href="#add-expense"
+          class="inline-flex items-center rounded-xl bg-indigo-600 px-4 py-2 text-white text-sm font-semibold shadow hover:bg-indigo-700 transition"
+          >+ Add Expense</a
+        >
+      </div>
+    </div>
+  </header>
+
+  <!-- Content Container -->
+  <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+    <!-- KPI Cards -->
+    <section>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div
+          class="bg-slate-900 rounded-2xl p-6 shadow-sm ring-1 ring-slate-800"
+        >
+          <div class="text-sm font-medium text-slate-400">Yearly Total</div>
+          <div class="mt-2 text-3xl font-bold tracking-tight text-emerald-400">
+            $
+            {% if yearly_sum is not None %} 
+                {{ yearly_sum|intcomma }}
+            {% else %} 
+                0
+            {% endif %} 
+          </div>
+          <div class="mt-3 h-1 rounded-full bg-emerald-900/40">
+            <div class="h-1 w-2/3 rounded-full bg-emerald-500"></div>
+          </div>
+        </div>
+        <div
+          class="bg-slate-900 rounded-2xl p-6 shadow-sm ring-1 ring-slate-800"
+        >
+          <div class="text-sm font-medium text-slate-400">Monthly Total</div>
+          <div class="mt-2 text-3xl font-bold tracking-tight text-indigo-400">
+            $ 
+            {% if yearly_sum is not None %} 
+                {{ monthly_sum|intcomma }}
+            {% else %} 
+                0
+            {% endif %} 
+          </div>
+          <div class="mt-3 h-1 rounded-full bg-indigo-900/40">
+            <div class="h-1 w-1/2 rounded-full bg-indigo-500"></div>
+          </div>
+        </div>
+        <div
+          class="bg-slate-900 rounded-2xl p-6 shadow-sm ring-1 ring-slate-800"
+        >
+          <div class="text-sm font-medium text-slate-400">Weekly Total</div>
+          <div class="mt-2 text-3xl font-bold tracking-tight text-rose-400">
+            $ 
+            {% if weekly_sum is not None %} 
+                {{ weekly_sum|intcomma }}
+            {% else %} 
+                0
+            {% endif %} 
+          </div>
+          <div class="mt-3 h-1 rounded-full bg-rose-900/40">
+            <div class="h-1 w-1/3 rounded-full bg-rose-500"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Add Expense + Charts -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Add Expense Card -->
+      <div id="add-expense" class="lg:col-span-1">
+        <div
+          class="bg-slate-900 rounded-2xl shadow-sm ring-1 ring-slate-800 p-6"
+        >
+          <h2 class="text-lg font-semibold text-slate-100 mb-4">Add Expense</h2>
+          <form action="" method="POST" class="space-y-4">
+            {% csrf_token %}
+
+            <div class="space-y-1">
+              <label for="name" class="text-sm text-slate-400"
+                >Expense Name</label
+              >
+              <div>{{ expense_form.name }}</div>
+            </div>
+
+            <div class="space-y-1">
+              <label for="amount" class="text-sm text-slate-400"
+                >Expense Amount</label
+              >
+              <div>{{ expense_form.amount }}</div>
+            </div>
+
+            <div class="space-y-1">
+              <label for="category" class="text-sm text-slate-400"
+                >Expense Category</label
+              >
+              <div>{{ expense_form.category }}</div>
+            </div>
+
+            <button
+              type="submit"
+              class="w-full inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-white text-sm font-semibold shadow hover:bg-indigo-700 transition"
+            >
+              Add Expense
+            </button>
+          </form>
+          <!-- Apply Tailwind classes to Django-rendered widgets without changing forms.py -->
+          <script>
+            (function styleDjangoWidgets() {
+              const selectors = ["input", "select", "textarea"];
+              document.querySelectorAll(selectors.join(","))?.forEach((el) => {
+                el.classList.add(
+                  "w-full",
+                  "rounded-xl",
+                  "border",
+                  "border-slate-700",
+                  "bg-slate-800",
+                  "px-3",
+                  "py-2.5",
+                  "text-sm",
+                  "text-slate-100",
+                  "placeholder-slate-400",
+                  "focus:outline-none",
+                  "focus:ring-2",
+                  "focus:ring-indigo-500",
+                  "focus:border-indigo-500"
+                );
+              });
+            })();
+          </script>
+        </div>
+      </div>
+
+      <!-- Charts Card -->
+      <div class="lg:col-span-2 grid grid-cols-1 gap-6">
+        <div
+          class="bg-slate-900 rounded-2xl shadow-sm ring-1 ring-slate-800 p-6"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-slate-100">
+              Expenses by Category
+            </h3>
+          </div>
+          <div class="relative h-72">
+            <canvas id="chartCategory" class="w-full h-full"></canvas>
+          </div>
+        </div>
+        <div
+          class="bg-slate-900 rounded-2xl shadow-sm ring-1 ring-slate-800 p-6"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-slate-100">
+              Daily Expenses Trend
+            </h3>
+          </div>
+          <div class="relative h-72">
+            <canvas id="chartDaily" class="w-full h-full"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tables -->
+    <section class="space-y-8">
+      <!-- Expenses Table -->
+      <div
+        class="bg-slate-900 rounded-2xl shadow-sm ring-1 ring-slate-800 overflow-hidden"
+      >
+        <div
+          class="px-6 py-4 flex items-center justify-between border-b border-slate-800"
+        >
+          <h2 class="text-lg font-semibold text-slate-100">Recent Expenses</h2>
+          <span class="text-sm text-slate-400"
+            >Total:
+            <span class="font-semibold text-slate-100"
+              >$ {{ total_expenses|intcomma }}</span
+            ></span
+          >
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-800">
+            <thead class="bg-slate-800/60">
+              <tr
+                class="text-left text-xs font-semibold uppercase tracking-wider text-slate-300"
+              >
+                <th class="px-6 py-3">Date</th>
+                <th class="px-6 py-3">Name</th>
+                <th class="px-6 py-3">Category</th>
+                <th class="px-6 py-3">Amount ($)</th>
+                <th class="px-6 py-3">Modify</th>
+                <th class="px-6 py-3">Delete</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800 text-sm text-slate-300">
+              {% for expense in all_expenses %}
+              <tr class="hover:bg-slate-800/60">
+                <td class="px-6 py-3 whitespace-nowrap">{{ expense.date }}</td>
+                <td class="px-6 py-3">{{ expense.name }}</td>
+                <td class="px-6 py-3">{{ expense.category }}</td>
+                <td class="px-6 py-3 font-semibold text-emerald-400">
+                  $ {{ expense.amount|intcomma }}
+                </td>
+                <td class="px-6 py-3">
+                  <a
+                    href="{% url 'edit' expense.id %}"
+                    class="inline-flex items-center rounded-lg px-3 py-1.5 bg-indigo-900/30 text-indigo-300 hover:bg-indigo-900/40 text-xs font-semibold"
+                    >Modify</a
+                  >
+                </td>
+                <td class="px-6 py-3">
+                  <form
+                    action="{% url 'delete' expense.id %}"
+                    method="POST"
+                    class="inline"
+                  >
+                    {% csrf_token %}
+                    <button
+                      type="submit"
+                      class="inline-flex items-center rounded-lg px-3 py-1.5 bg-rose-900/30 text-rose-300 hover:bg-rose-900/40 text-xs font-semibold"
+                    >
+                      Delete
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" class="px-6 py-6 text-center text-slate-400">
+                  No expenses recorded yet.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Daily Sums Table -->
+      <div
+        class="bg-slate-900 rounded-2xl shadow-sm ring-1 ring-slate-800 overflow-hidden"
+      >
+        <div class="px-6 py-4 border-b border-slate-800">
+          <h2 class="text-lg font-semibold text-slate-100">
+            Daily Expenses Summary
+          </h2>
+        </div>
+        <div class="overflow-x-auto">
+          <table id="daily-sums" class="min-w-full divide-y divide-slate-800">
+            <thead class="bg-slate-800/60">
+              <tr
+                class="text-left text-xs font-semibold uppercase tracking-wider text-slate-300"
+              >
+                <th class="px-6 py-3">Date</th>
+                <th class="px-6 py-3 text-right">Total Expenses ($)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800 text-sm text-slate-300">
+              {% for entry in daily_sums %}
+              <tr class="hover:bg-slate-800/60">
+                <td class="px-6 py-3">{{ entry.date }}</td>
+                <td class="px-6 py-3 text-right font-semibold">
+                  ${{ entry.sum|intcomma }}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="2" class="px-6 py-6 text-center text-slate-400">
+                  No expenses data available.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- expenses by Category Table -->
+      <div
+        class="bg-slate-900 rounded-2xl shadow-sm ring-1 ring-slate-800 overflow-hidden"
+      >
+        <div class="px-6 py-4 border-b border-slate-800">
+          <h2 class="text-lg font-semibold text-slate-100">
+            Expenses by Category
+          </h2>
+        </div>
+        <div class="overflow-x-auto">
+          <table id="cat-table" class="min-w-full divide-y divide-slate-800">
+            <thead class="bg-slate-800/60">
+              <tr
+                class="text-left text-xs font-semibold uppercase tracking-wider text-slate-300"
+              >
+                <th class="px-6 py-3">Category</th>
+                <th class="px-6 py-3 text-right">Total expenses ($)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800 text-sm text-slate-300">
+              {% for entry in categorical_sums %}
+              <tr class="hover:bg-slate-800/60">
+                <td id="cat" class="px-6 py-3">{{ entry.category }}</td>
+                <td id="sum" class="px-6 py-3 text-right font-semibold">
+                  ${{ entry.sum|intcomma }}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="2" class="px-6 py-6 text-center text-slate-400">
+                  No expenses data available.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // ==== Dark Mode defaults for Chart.js ====
+    if (window.Chart) {
+      Chart.defaults.color = "#cbd5e1"; // slate-300
+    }
+    const gridColor = "#334155"; // slate-700
+
+    // Read Category table -> arrays
+    const catTable = document.getElementById("cat-table");
+    const cats = [];
+    const catexpenses = [];
+    if (catTable) {
+      const cells = catTable.querySelectorAll("tbody td");
+      for (let i = 0; i < cells.length; i += 2) {
+        const cat = cells[i].innerText.trim();
+        const raw = cells[i + 1]?.innerText || "0";
+        const val = parseFloat(raw.replace(/[^\d.-]/g, "")) || 0;
+        if (cat) {
+          cats.push(cat);
+          catexpenses.push(val);
+        }
+      }
+    }
+
+    // Read Daily sums table -> arrays
+    const dailyTable = document.getElementById("daily-sums");
+    const dates = [];
+    const dailyexpenses = [];
+    if (dailyTable) {
+      const rows = dailyTable.querySelectorAll("tbody tr");
+      rows.forEach((r) => {
+        const tds = r.querySelectorAll("td");
+        if (tds.length >= 2) {
+          dates.push(tds[0].innerText.trim());
+          const raw = tds[1].innerText || "0";
+          dailyexpenses.push(parseFloat(raw.replace(/[^\d.-]/g, "")) || 0);
+        }
+      });
+    }
+
+    const elCat = document.getElementById("chartCategory");
+    const elDaily = document.getElementById("chartDaily");
+
+    if (elCat && cats.length) {
+      window.__charts = window.__charts || {};
+      if (window.__charts.chartCategory) {
+        try {
+          window.__charts.chartCategory.destroy();
+        } catch (e) {}
+      }
+      window.__charts.chartCategory = new Chart(elCat, {
+        type: "doughnut",
+        data: { labels: cats, datasets: [{ data: catexpenses }] },
+        options: {
+          plugins: {
+            legend: { position: "bottom", labels: { usePointStyle: true } },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.label}: $${ctx.parsed.toLocaleString()}`,
+              },
+            },
+          },
+          cutout: "55%",
+          responsive: true,
+          maintainAspectRatio: false,
+        },
+      });
+    } else if (elCat) {
+      elCat.parentElement.innerHTML =
+        '<p class="text-sm text-slate-400">Not enough data to render category chart.</p>';
+    }
+
+    if (elDaily && dates.length) {
+      window.__charts = window.__charts || {};
+      if (window.__charts.chartDaily) {
+        try {
+          window.__charts.chartDaily.destroy();
+        } catch (e) {}
+      }
+      window.__charts.chartDaily = new Chart(elDaily, {
+        type: "line",
+        data: {
+          labels: dates,
+          datasets: [
+            {
+              label: "Daily Expenses",
+              data: dailyexpenses,
+              tension: 0.35,
+              pointRadius: 3,
+              fill: false,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            x: { ticks: { color: "#cbd5e1" }, grid: { color: gridColor } },
+            y: {
+              beginAtZero: true,
+              ticks: { color: "#cbd5e1" },
+              grid: { color: gridColor },
+            },
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `$${ctx.parsed.y.toLocaleString()}`,
+              },
+            },
+          },
+          responsive: true,
+          maintainAspectRatio: false,
+        },
+      });
+    } else if (elDaily) {
+      elDaily.parentElement.innerHTML =
+        '<p class="text-sm text-slate-400">Not enough data to render daily trend.</p>';
+    }
+  });
+</script>
+
+{% endblock %}

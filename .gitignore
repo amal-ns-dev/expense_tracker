@@ -1,1 +1,11 @@
 /.venv
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Django migrations
+/my_app/migrations/
+
+# Database
+db.sqlite3
